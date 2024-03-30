@@ -1073,12 +1073,12 @@ fn idl_set_buffer(cfg_override: &ConfigOverride, program_id: Pubkey, buffer: Pub
         };
 
         // Build the transaction.
-        let (recent_hash, _fee_calc) = client.get_recent_blockhash()?;
+        let hash = client.get_latest_blockhash()?;
         let tx = Transaction::new_signed_with_payer(
             &[set_buffer_ix],
             Some(&keypair.pubkey()),
             &[&keypair],
-            recent_hash,
+            hash,
         );
 
         // Send the transaction.
@@ -1162,13 +1162,9 @@ fn idl_set_authority(
             data,
         };
         // Send transaction.
-        let (recent_hash, _fee_calc) = client.get_recent_blockhash()?;
-        let tx = Transaction::new_signed_with_payer(
-            &[ix],
-            Some(&keypair.pubkey()),
-            &[&keypair],
-            recent_hash,
-        );
+        let hash = client.get_latest_blockhash()?;
+        let tx =
+            Transaction::new_signed_with_payer(&[ix], Some(&keypair.pubkey()), &[&keypair], hash);
         client.send_and_confirm_transaction_with_spinner_and_config(
             &tx,
             CommitmentConfig::confirmed(),
@@ -1246,13 +1242,9 @@ fn idl_write(cfg: &Config, program_id: &Pubkey, idl: &Idl, idl_address: Pubkey) 
             data,
         };
         // Send transaction.
-        let (recent_hash, _fee_calc) = client.get_recent_blockhash()?;
-        let tx = Transaction::new_signed_with_payer(
-            &[ix],
-            Some(&keypair.pubkey()),
-            &[&keypair],
-            recent_hash,
-        );
+        let hash = client.get_latest_blockhash()?;
+        let tx =
+            Transaction::new_signed_with_payer(&[ix], Some(&keypair.pubkey()), &[&keypair], hash);
         client.send_and_confirm_transaction_with_spinner_and_config(
             &tx,
             CommitmentConfig::confirmed(),
@@ -1405,7 +1397,7 @@ fn genesis_flags(cfg: &WithPath<Config>) -> Result<Vec<String>> {
         flags.push(address.clone());
         flags.push(binary_path);
 
-        if let Some(mut idl) = program.idl.as_mut() {
+        if let Some(idl) = program.idl.as_mut() {
             // Add program address to the IDL.
             idl.metadata = Some(serde_json::to_value(IdlTestMetadata { address })?);
 
@@ -1496,7 +1488,7 @@ fn start_test_validator(cfg: &Config, flags: Option<Vec<String>>) -> Result<Chil
     let mut count = 0;
     let ms_wait = 5000;
     while count < ms_wait {
-        let r = client.get_recent_blockhash();
+        let r = client.get_latest_blockhash();
         if r.is_ok() {
             break;
         }
@@ -1570,7 +1562,7 @@ fn _deploy(
                 std::process::exit(exit.status.code().unwrap_or(1));
             }
 
-            if let Some(mut idl) = program.idl.as_mut() {
+            if let Some(idl) = program.idl.as_mut() {
                 // Add program address to the IDL.
                 idl.metadata = Some(serde_json::to_value(IdlTestMetadata {
                     address: program_kp.pubkey().to_string(),
@@ -1711,13 +1703,9 @@ fn create_idl_account(
             accounts,
             data,
         };
-        let (recent_hash, _fee_calc) = client.get_recent_blockhash()?;
-        let tx = Transaction::new_signed_with_payer(
-            &[ix],
-            Some(&keypair.pubkey()),
-            &[&keypair],
-            recent_hash,
-        );
+        let hash = client.get_latest_blockhash()?;
+        let tx =
+            Transaction::new_signed_with_payer(&[ix], Some(&keypair.pubkey()), &[&keypair], hash);
         client.send_and_confirm_transaction_with_spinner_and_config(
             &tx,
             CommitmentConfig::confirmed(),
@@ -1776,12 +1764,12 @@ fn create_idl_buffer(
     };
 
     // Build the transaction.
-    let (recent_hash, _fee_calc) = client.get_recent_blockhash()?;
+    let hash = client.get_latest_blockhash()?;
     let tx = Transaction::new_signed_with_payer(
         &[create_account_ix, create_buffer_ix],
         Some(&keypair.pubkey()),
         &[&keypair, &buffer],
-        recent_hash,
+        hash,
     );
 
     // Send the transaction.
